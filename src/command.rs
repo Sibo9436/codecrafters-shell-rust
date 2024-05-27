@@ -1,23 +1,36 @@
 use thiserror::Error;
 
-mod builtin;
+use self::exit::ExitRunner;
+
+mod exit;
 
 #[derive(Error, Debug)]
 pub(crate) enum CommandError {
     #[error("{0}: command not found")]
     CommandNotFound(String),
+    #[error("not enough arguments for command")]
+    NotEnoughArguments {},
 }
 
+// NOTE: should I also define a runner definition for this?
 pub(crate) trait Runner {
     fn run(&self) -> Result<String, CommandError>;
 }
 
 #[allow(dead_code)]
-struct CommandRunner<'a> {
-    cmd: &'a str,
-    args: &'a [&'a str],
+struct CommandRunner {
+    cmd: String,
+    args: Vec<String>,
 }
-impl<'a> Runner for CommandRunner<'a> {
+impl CommandRunner {
+    fn new(toks: &[&str]) -> Self {
+        CommandRunner {
+            cmd: toks[0].to_owned(),
+            args: toks[1..].iter().map(|s| s.to_string()).collect(),
+        }
+    }
+}
+impl Runner for CommandRunner {
     fn run(&self) -> Result<String, CommandError> {
         // TODO: here we should look in the path directories :)
         Err(CommandError::CommandNotFound(self.cmd.to_string()))
@@ -33,13 +46,16 @@ pub(crate) fn parse_command(input: &str) -> Result<String, CommandError> {
     if toks.is_empty() {
         return Ok(String::from(""));
     }
-    let runner = init_runner(&toks);
-    runner.and_then(|r| r.run())
+    let runner = init_runner(&toks)?;
+    runner.run()
 }
 
-fn init_runner<'a>(toks: &'a [&'a str]) -> Result<impl Runner + 'a, CommandError> {
-    Ok(CommandRunner {
-        cmd: toks[0],
-        args: &toks[1..],
-    })
+fn init_runner(toks: &[&str]) -> Result<Box<dyn Runner + 'static>, CommandError> {
+    match toks[0] {
+        "exit" => match ExitRunner::new(&toks[1..]) {
+            Ok(runner) => Ok(Box::new(runner)),
+            Err(e) => Err(e),
+        },
+        _ => Ok(Box::new(CommandRunner::new(toks))),
+    }
 }
