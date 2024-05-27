@@ -1,7 +1,8 @@
 use thiserror::Error;
 
-use self::exit::ExitRunner;
+use self::{echo::Echo, exit::ExitRunner};
 
+mod echo;
 mod exit;
 
 #[derive(Error, Debug)]
@@ -56,6 +57,7 @@ fn init_runner(toks: &[&str]) -> Result<Box<dyn Runner + 'static>, CommandError>
             Ok(runner) => Ok(Box::new(runner)),
             Err(e) => Err(e),
         },
+        "echo" => Ok(Box::new(Echo::new(&toks[1..]))),
         _ => Ok(Box::new(CommandRunner::new(toks))),
     }
 }
