@@ -1,6 +1,11 @@
+use std::process;
+
 use thiserror::Error;
 
-use self::builtin::{Echo, Type};
+use self::{
+    builtin::{Echo, Type},
+    path::find_in_path,
+};
 
 mod builtin;
 mod path;
@@ -34,7 +39,13 @@ impl CommandRunner {
 impl Runner for CommandRunner {
     fn run(&self) -> Result<String, CommandError> {
         // TODO: here we should look in the path directories :)
-        Err(CommandError::CommandNotFound(self.cmd.to_string()))
+        if let Some(path) = find_in_path(&self.cmd) {
+            //tecnicamente process::Command cerca già da solo nel path ma who cares
+            let _status = process::Command::new(path).args(&self.args).status();
+            Ok("".to_string())
+        } else {
+            Err(CommandError::CommandNotFound(self.cmd.to_string()))
+        }
     }
 }
 
