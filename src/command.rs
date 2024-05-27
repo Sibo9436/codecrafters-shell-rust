@@ -12,6 +12,7 @@ pub(crate) trait Runner {
     fn run(&self) -> Result<String, CommandError>;
 }
 
+#[allow(dead_code)]
 struct CommandRunner<'a> {
     cmd: &'a str,
     args: &'a [&'a str],
@@ -24,8 +25,12 @@ impl<'a> Runner for CommandRunner<'a> {
 }
 
 pub(crate) fn parse_command(input: &str) -> Result<String, CommandError> {
-    let toks: Vec<&str> = input.split(' ').filter(|&s| !s.is_empty()).collect();
-    if toks.len() == 0 {
+    let toks: Vec<&str> = input
+        .split(' ')
+        .filter(|&s| !s.is_empty())
+        .map(|s| s.trim())
+        .collect();
+    if toks.is_empty() {
         return Ok(String::from(""));
     }
     let runner = init_runner(&toks);
