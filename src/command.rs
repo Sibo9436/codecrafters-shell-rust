@@ -1,9 +1,8 @@
 use thiserror::Error;
 
-use self::{echo::Echo, exit::ExitRunner};
+use self::builtin::{Echo, Type};
 
-mod echo;
-mod exit;
+mod builtin;
 
 #[derive(Error, Debug)]
 pub(crate) enum CommandError {
@@ -53,10 +52,17 @@ pub(crate) fn parse_command(input: &str) -> Result<String, CommandError> {
 
 fn init_runner(toks: &[&str]) -> Result<Box<dyn Runner + 'static>, CommandError> {
     match toks[0] {
-        "exit" => match ExitRunner::new(&toks[1..]) {
+        "exit" => match builtin::ExitRunner::new(&toks[1..]) {
             Ok(runner) => Ok(Box::new(runner)),
             Err(e) => Err(e),
         },
+        "type" => {
+            if toks[1..].is_empty() {
+                Err(CommandError::NotEnoughArguments {})
+            } else {
+                Ok(Box::new(Type::new(&toks[1..])))
+            }
+        }
         "echo" => Ok(Box::new(Echo::new(&toks[1..]))),
         _ => Ok(Box::new(CommandRunner::new(toks))),
     }
