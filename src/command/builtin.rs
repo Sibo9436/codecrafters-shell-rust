@@ -1,7 +1,7 @@
 use super::{CommandError, Runner};
-use core::fmt;
 use std::process::exit;
 
+#[allow(unused)]
 pub(super) enum Builtin {
     Echo(Echo),
     Exit(ExitRunner),
