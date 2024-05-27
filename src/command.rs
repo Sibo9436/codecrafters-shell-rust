@@ -3,6 +3,7 @@ use thiserror::Error;
 use self::builtin::{Echo, Type};
 
 mod builtin;
+mod path;
 
 #[derive(Error, Debug)]
 pub(crate) enum CommandError {

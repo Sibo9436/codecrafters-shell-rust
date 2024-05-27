@@ -1,4 +1,4 @@
-use super::{CommandError, Runner};
+use super::{path::find_in_path, CommandError, Runner};
 use std::process::exit;
 
 #[allow(unused)]
@@ -77,7 +77,13 @@ impl Runner for Type {
             "echo" => "echo is a shell builtin".to_string(),
             "exit" => "exit is a shell builtin".to_string(),
             "type" => "type is a shell builtin".to_string(),
-            v => format!("{v} not found"),
+            v => {
+                if let Some(path) = find_in_path(&self.arg) {
+                    format!("{v} is {}", path.display())
+                } else {
+                    format!("{v} not found")
+                }
+            }
         })
     }
 }
