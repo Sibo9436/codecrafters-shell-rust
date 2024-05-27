@@ -21,7 +21,7 @@ fn main() {
         }
         input.clear();
         // TODO: clean up
-        print!("\n$ ");
+        print!("$ ");
         io::stdout().flush().unwrap();
     }
 }
