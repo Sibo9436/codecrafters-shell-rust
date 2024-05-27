@@ -17,7 +17,7 @@ fn main() {
         //println!("{input}");
         match command::parse_command(&input) {
             Ok(p) => print!("{p}"),
-            Err(e) => print!("{e}"),
+            Err(e) => println!("{e}"),
         }
         input.clear();
         // TODO: clean up

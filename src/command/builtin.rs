@@ -35,7 +35,7 @@ impl Echo {
 }
 impl Runner for Echo {
     fn run(&self) -> Result<String, super::CommandError> {
-        Ok(self.args.clone())
+        Ok(self.args.clone() + "\n")
     }
 }
 
@@ -74,14 +74,14 @@ impl Runner for Type {
     // TODO: I can do better
     fn run(&self) -> Result<String, CommandError> {
         Ok(match self.arg.as_str() {
-            "echo" => "echo is a shell builtin".to_string(),
-            "exit" => "exit is a shell builtin".to_string(),
-            "type" => "type is a shell builtin".to_string(),
+            "echo" => "echo is a shell builtin\n".to_string(),
+            "exit" => "exit is a shell builtin\n".to_string(),
+            "type" => "type is a shell builtin\n".to_string(),
             v => {
                 if let Some(path) = find_in_path(&self.arg) {
-                    format!("{v} is {}", path.display())
+                    format!("{v} is {}\n", path.display())
                 } else {
-                    format!("{v} not found")
+                    format!("{v} not found\n")
                 }
             }
         })
