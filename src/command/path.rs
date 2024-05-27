@@ -2,7 +2,6 @@ use std::{env, fs::read_dir, path::PathBuf};
 
 pub(super) fn find_in_path(cmd: &str) -> Option<PathBuf> {
     let path = env::var("PATH").ok()?;
-    println!("{path}");
 
     let path = path.split(':');
     for dir in path {

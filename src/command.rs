@@ -43,6 +43,9 @@ impl Runner for CommandRunner {
             //tecnicamente process::Command cerca già da solo nel path ma who cares
             let _status = process::Command::new(path).args(&self.args).status();
             Ok("".to_string())
+        } else if self.cmd.starts_with("/") {
+            let _status = process::Command::new(&self.cmd).args(&self.args).status();
+            Ok("".to_string())
         } else {
             Err(CommandError::CommandNotFound(self.cmd.to_string()))
         }
