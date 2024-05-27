@@ -1,5 +1,6 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
+mod command;
 
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -12,5 +13,15 @@ fn main() {
     // Wait for user input
     let stdin = io::stdin();
     let mut input = String::new();
-    stdin.read_line(&mut input).unwrap();
+    while let Ok(_len) = stdin.read_line(&mut input) {
+        //println!("{input}");
+        match command::parse_command(&input) {
+            Ok(p) => print!("{p}"),
+            Err(e) => print!("{e}"),
+        }
+        input.clear();
+        // TODO: clean up
+        print!("\n$ ");
+        io::stdout().flush().unwrap();
+    }
 }
