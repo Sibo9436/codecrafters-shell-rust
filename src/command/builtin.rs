@@ -129,15 +129,22 @@ impl<'a> Runner for Cd<'a> {
             let path =
                 path::PathBuf::from_str(&self.dir).map_err(|_| CommandError::Fatal("non so"))?;
             path
+        } else if self.dir.starts_with("~") {
+            let path = env::var("HOME").map_err(|_| CommandError::Fatal("non so"))?;
+            let path = path::PathBuf::from_str(&path).map_err(|_| CommandError::Fatal("non so"))?;
+            if self.dir.len() > 2 {
+                path.join(&self.dir[2..])
+            } else {
+                path
+            }
         } else if self.dir.starts_with("./") {
-            let current = Pwd.run()? + &self.dir[2..];
-            let current = path::Path::new(&current);
+            let current =
+                env::current_dir().map_err(|_| CommandError::Fatal("could not read pwd"))?;
+            let current = current.join(&self.dir[2..]);
             current.to_path_buf()
         } else {
-            let current = Pwd.run()?;
-            // NOTE:  a lot of allocations going on round here
             let mut current =
-                path::PathBuf::from_str(&current).map_err(|_| CommandError::Fatal("non so"))?;
+                env::current_dir().map_err(|_| CommandError::Fatal("could not read pwd"))?;
             let p_split = self.dir.split("/");
             for d in p_split {
                 if d == ".." {
