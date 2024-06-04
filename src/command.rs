@@ -3,7 +3,7 @@ use std::process;
 use thiserror::Error;
 
 use self::{
-    builtin::{Echo, Type},
+    builtin::{Echo, Pwd, Type},
     path::find_in_path,
 };
 
@@ -16,6 +16,8 @@ pub(crate) enum CommandError {
     CommandNotFound(String),
     #[error("not enough arguments for command")]
     NotEnoughArguments {},
+    #[error("fatal error: {0}")]
+    Fatal(&'static str),
 }
 
 // NOTE: should I also define a runner definition for this?
@@ -79,6 +81,7 @@ fn init_runner(toks: &[&str]) -> Result<Box<dyn Runner + 'static>, CommandError>
             }
         }
         "echo" => Ok(Box::new(Echo::new(&toks[1..]))),
+        "pwd" => Ok(Box::new(Pwd)),
         _ => Ok(Box::new(CommandRunner::new(toks))),
     }
 }

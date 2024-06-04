@@ -1,5 +1,5 @@
 use super::{path::find_in_path, CommandError, Runner};
-use std::process::exit;
+use std::{env, process::exit};
 
 #[allow(unused)]
 pub(super) enum Builtin {
@@ -74,9 +74,11 @@ impl Runner for Type {
     // TODO: I can do better
     fn run(&self) -> Result<String, CommandError> {
         Ok(match self.arg.as_str() {
+            // TODO: migliorabile
             "echo" => "echo is a shell builtin\n".to_string(),
             "exit" => "exit is a shell builtin\n".to_string(),
             "type" => "type is a shell builtin\n".to_string(),
+            "pwd" => "pwd is a shell builtin\n".to_string(),
             v => {
                 if let Some(path) = find_in_path(&self.arg) {
                     format!("{v} is {}\n", path.display())
@@ -85,5 +87,18 @@ impl Runner for Type {
                 }
             }
         })
+    }
+}
+
+pub(super) struct Pwd;
+
+impl Runner for Pwd {
+    fn run(&self) -> Result<String, CommandError> {
+        env::var("PWD")
+            .map(|mut pwd| {
+                pwd.push('\n');
+                pwd
+            })
+            .map_err(|_| CommandError::Fatal("could not read pwd"))
     }
 }
