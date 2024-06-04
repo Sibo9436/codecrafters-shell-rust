@@ -3,7 +3,7 @@ use std::process;
 use thiserror::Error;
 
 use self::{
-    builtin::{Echo, Pwd, Type},
+    builtin::{Cd, Echo, Pwd, Type},
     path::find_in_path,
 };
 
@@ -18,6 +18,8 @@ pub(crate) enum CommandError {
     NotEnoughArguments {},
     #[error("fatal error: {0}")]
     Fatal(&'static str),
+    #[error("cd: {0}: No such file or directory")]
+    PathNotFound(String),
 }
 
 // NOTE: should I also define a runner definition for this?
@@ -67,7 +69,7 @@ pub(crate) fn parse_command(input: &str) -> Result<String, CommandError> {
     runner.run()
 }
 
-fn init_runner(toks: &[&str]) -> Result<Box<dyn Runner + 'static>, CommandError> {
+fn init_runner<'a>(toks: &[&'a str]) -> Result<Box<dyn Runner + 'a>, CommandError> {
     match toks[0] {
         "exit" => match builtin::ExitRunner::new(&toks[1..]) {
             Ok(runner) => Ok(Box::new(runner)),
@@ -81,6 +83,7 @@ fn init_runner(toks: &[&str]) -> Result<Box<dyn Runner + 'static>, CommandError>
             }
         }
         "echo" => Ok(Box::new(Echo::new(&toks[1..]))),
+        "cd" => Ok(Box::new(Cd::new(&toks[1]))),
         "pwd" => Ok(Box::new(Pwd)),
         _ => Ok(Box::new(CommandRunner::new(toks))),
     }
